@@ -1,0 +1,33 @@
+SENSORES DEL AÑO PASADO
+
+BM 680:
+Temperatura °C
+% Humedad relativa
+Presión
+Indice de VOC
+
+MH-Z19D:
+CO2 (en ppm)
+
+MQ-4:
+CH4 (en ppm)
+
+MQ7:
+CO (en ppm)
+
+MQ135:
+O3 (en ppm)
+NO2 (en ppm)
+
+ESTE AÑO SE SUMAN:
+
+MQ137:
+NH3 (en ppm) 5 a 500 ppm
+CO (en ppm)
+
+Pixhawk:
+Coordenadas
+Altura
+
+
+
