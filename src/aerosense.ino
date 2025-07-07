@@ -36,6 +36,9 @@
 // Includes the Pixhawk interface functions
 #include "sensors/Pixhawk.hpp"
 
+// Includes data logging functionality
+#include "storage/DataLogger.hpp"
+
 // Includes Bluetooth communication functions
 #include "protocols/Bluetooth.hpp"
 
@@ -87,6 +90,16 @@ void setup()
     // Initialize all sensors
     initSensors();
 
+    // Initialize data logging system
+    if (!initDataLogger())
+    {
+        Serial.println("Failed Init Data Logger");
+    }
+    else
+    {
+        Serial.println("Init Data Logger OK !");
+    }
+
     // Initialize Bluetooth communication
     if (!initCommBT())
     {
@@ -122,6 +135,10 @@ void loop()
         if (xEnableMeasuring)
         {
             readAllSensors();
+            
+            // Log sensor data for offline storage
+            logSensorData(&dataBME680, &dataMHZ19B, &dataMQ4, &dataMQ7, 
+                         &dataMQ131, &dataMQ137, &dataPixhawk);
         }
     }
 }
