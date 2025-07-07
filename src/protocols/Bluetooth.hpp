@@ -25,16 +25,15 @@ void handleBT(uint8_t *xEnableMeasuring);
 // Sends data via Bluetooth
 void sendData(String nom, uint16_t data, String unidad, uint8_t CR);
 
-// Handles data logging commands via Bluetooth
-// @param command: The received command string
-void handleDataLoggingCommands(String command);
+// Sends help message with available commands
+void sendHelpMessage();
 
-// Sends logging status via Bluetooth
-void sendLoggingStatus();
+// Handles SD card commands via Bluetooth
+// @param command: The SD card command
+void handleSDCommands(String command);
 
-// Handles data download commands
-// @param command: The download command
-void handleDownloadCommands(String command);
+// Sends SD card status via Bluetooth
+void sendSDStatus();
 
 #endif // COMMBLUETOOTH_hpp
 

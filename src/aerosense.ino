@@ -36,8 +36,8 @@
 // Includes the Pixhawk interface functions
 #include "sensors/Pixhawk.hpp"
 
-// Includes data logging functionality
-#include "storage/DataLogger.hpp"
+// Includes SD card logging functionality
+#include "storage/SDLogger.hpp"
 
 // Includes Bluetooth communication functions
 #include "protocols/Bluetooth.hpp"
@@ -90,14 +90,14 @@ void setup()
     // Initialize all sensors
     initSensors();
 
-    // Initialize data logging system
-    if (!initDataLogger())
+    // Initialize SD card logging system
+    if (!initSDLogger())
     {
-        Serial.println("Failed Init Data Logger");
+        Serial.println("Failed Init SD Logger - system cannot log data!");
     }
     else
     {
-        Serial.println("Init Data Logger OK !");
+        Serial.println("Init SD Logger OK !");
     }
 
     // Initialize Bluetooth communication
@@ -136,9 +136,19 @@ void loop()
         {
             readAllSensors();
             
-            // Log sensor data for offline storage
-            logSensorData(&dataBME680, &dataMHZ19B, &dataMQ4, &dataMQ7, 
-                         &dataMQ131, &dataMQ137, &dataPixhawk);
+            // Log sensor data to SD card
+            t_dataRecord record;
+            record.timestamp = millis() / 1000;
+            record.record_id = 0; // Will be set by SD logging system
+            record.bme680 = dataBME680;
+            record.mhz19b = dataMHZ19B;
+            record.mq4 = dataMQ4;
+            record.mq7 = dataMQ7;
+            record.mq131 = dataMQ131;
+            record.mq137 = dataMQ137;
+            record.pixhawk = dataPixhawk;
+            
+            logRecordToSD(&record);
         }
     }
 }

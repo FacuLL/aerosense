@@ -17,8 +17,8 @@
 // Required for Bluetooth communication
 #include "Bluetooth.hpp"
 
-// Include data logger for logging commands
-#include "../storage/DataLogger.hpp"
+// Include SD card logger for logging commands
+#include "../storage/SDLogger.hpp"
 
 /* ---------------------- GLOBAL VARIABLES ---------------------- */
 
@@ -42,8 +42,8 @@ int initCommBT()
         return 0;
     }
 
-    // Indicate successful startup
-    SerialBT.print("STARTED");
+    // Indicate successful startup with helpful message
+    SerialBT.print("AeroSense READY - Send 'HELP' for commands\n");
 
     return 1;
 }
@@ -99,147 +99,272 @@ void processBluetoothCommand(String command, uint8_t *xEnableMeasuring)
     command.trim(); // Remove whitespace
     command.toUpperCase(); // Convert to uppercase for consistency
     
-    // Legacy single character commands
-    if (command == "1")
+    // Main measurement commands
+    if (command == "START" || command == "START_MEASURING" || command == "BEGIN")
     {
         *xEnableMeasuring = 1;
-        startLogging();
-        SerialBT.print("START MEASURING & LOGGING\n");
+        uint16_t flight_num = startSDFlightSession();
+        if (flight_num > 0)
+        {
+            SerialBT.printf("MEASURING STARTED - SD Flight %d\n", flight_num);
+        }
+        else
+        {
+            SerialBT.print("MEASURING STARTED - SD LOGGING FAILED\n");
+        }
+    }
+    else if (command == "STOP" || command == "STOP_MEASURING" || command == "END")
+    {
+        *xEnableMeasuring = 0;
+        endSDFlightSession();
+        SerialBT.print("MEASURING STOPPED - SD FLIGHT ENDED\n");
+    }
+    // Legacy single character commands (for backward compatibility)
+    else if (command == "1")
+    {
+        *xEnableMeasuring = 1;
+        uint16_t flight_num = startSDFlightSession();
+        if (flight_num > 0)
+        {
+            SerialBT.printf("START MEASURING & SD LOGGING - Flight %d\n", flight_num);
+        }
+        else
+        {
+            SerialBT.print("START MEASURING - SD LOGGING FAILED\n");
+        }
     }
     else if (command == "0")
     {
         *xEnableMeasuring = 0;
-        stopLogging();
-        SerialBT.print("STOP MEASURING & LOGGING\n");
+        endSDFlightSession();
+        SerialBT.print("STOP MEASURING & SD LOGGING\n");
     }
-    // Data logging commands
-    else if (command == "LOG_START")
+    // SD logging commands (simplified from flash commands)
+    else if (command == "LOG_START" || command == "START_FLIGHT" || command == "NEW_FLIGHT")
     {
-        if (startLogging())
+        uint16_t flight_num = startSDFlightSession();
+        if (flight_num > 0)
         {
-            SerialBT.print("LOGGING STARTED\n");
+            SerialBT.printf("SD FLIGHT STARTED: %d\n", flight_num);
         }
         else
         {
-            SerialBT.print("LOGGING START FAILED\n");
+            SerialBT.print("SD FLIGHT START FAILED\n");
         }
     }
-    else if (command == "LOG_STOP")
+    else if (command == "LOG_STOP" || command == "END_FLIGHT" || command == "CLOSE_FLIGHT")
     {
-        if (stopLogging())
+        if (endSDFlightSession())
         {
-            SerialBT.print("LOGGING STOPPED\n");
+            SerialBT.print("SD FLIGHT STOPPED\n");
         }
         else
         {
-            SerialBT.print("LOGGING STOP FAILED\n");
+            SerialBT.print("SD FLIGHT STOP FAILED\n");
         }
     }
-    else if (command == "LOG_STATUS")
+    else if (command == "LOG_STATUS" || command == "STATUS" || command == "INFO")
     {
-        sendLoggingStatus();
+        sendSDStatus();
     }
-    else if (command.startsWith("DOWNLOAD"))
+    else if (command == "LIST_FLIGHTS" || command == "FLIGHTS")
     {
-        handleDownloadCommands(command);
+        handleSDCommands("SD_LIST_FLIGHTS");
     }
-    else if (command == "LOG_CLEAR")
+    else if (command.startsWith("DOWNLOAD_FLIGHT:"))
     {
-        if (clearStoredData())
+        String sd_command = "SD_" + command;
+        handleSDCommands(sd_command);
+    }
+    else if (command.startsWith("SD_"))
+    {
+        handleSDCommands(command);
+    }
+    else if (command == "HELP" || command == "COMMANDS" || command == "?")
+    {
+        sendHelpMessage();
+    }
+    else if (command == "CLEAR_DATA" || command == "FORMAT_SD")
+    {
+        if (formatSDCard())
         {
-            SerialBT.print("DATA CLEARED\n");
+            SerialBT.print("SD CARD FORMATTED\n");
         }
         else
         {
-            SerialBT.print("CLEAR FAILED\n");
+            SerialBT.print("SD FORMAT FAILED\n");
         }
     }
-    else if (command == "STORAGE_INFO")
+    else if (command == "STORAGE_INFO" || command == "SD_INFO")
     {
-        uint32_t used, total;
-        if (getStorageStats(&used, &total))
+        uint64_t total, used, free;
+        if (getSDCardInfo(&total, &used, &free))
         {
-            SerialBT.printf("STORAGE: %d/%d bytes used\n", used, total);
+            SerialBT.printf("SD STORAGE: Total=%lluMB Used=%lluMB Free=%lluMB\n",
+                           total/(1024*1024), used/(1024*1024), free/(1024*1024));
         }
+        else
+        {
+            SerialBT.print("SD CARD NOT AVAILABLE\n");
+        }
+    }
+    else
+    {
+        // Unknown command
+        SerialBT.printf("UNKNOWN COMMAND: %s\n", command.c_str());
+        SerialBT.print("Send 'HELP' for available commands\n");
     }
 }
 
 
 /* *****************************************************************
-    *                   DATA LOGGING FUNCTIONS                    *
+    *                     SD CARD FUNCTIONS                       *
    ***************************************************************** */
 
 // Process complete Bluetooth commands (declaration for internal use)
 void processBluetoothCommand(String command, uint8_t *xEnableMeasuring);
 
-// Sends logging status via Bluetooth
-void sendLoggingStatus()
+// Sends help message with available commands
+void sendHelpMessage()
 {
-    t_loggerConfig config;
-    getLoggingStatus(&config);
-    
-    SerialBT.printf("LOG_STATUS: State=%d Records=%d Index=%d Total=%d\n",
-                    config.logging_state, config.total_records, 
-                    config.current_index, config.total_logged);
+    SerialBT.print("\n=== AeroSense Commands ===\n");
+    SerialBT.print("MEASUREMENT:\n");
+    SerialBT.print("  START / BEGIN        - Start measuring and logging\n");
+    SerialBT.print("  STOP / END           - Stop measuring and logging\n");
+    SerialBT.print("  STATUS               - Show system status\n");
+    SerialBT.print("\nFLIGHT MANAGEMENT:\n");
+    SerialBT.print("  START_FLIGHT         - Start new flight session\n");
+    SerialBT.print("  END_FLIGHT           - End current flight session\n");
+    SerialBT.print("  LIST_FLIGHTS         - List all recorded flights\n");
+    SerialBT.print("\nDATA RETRIEVAL:\n");
+    SerialBT.print("  SD_DOWNLOAD_FLIGHT:N - Download flight N data\n");
+    SerialBT.print("  SD_LIST_FLIGHTS      - Detailed flight list\n");
+    SerialBT.print("  STORAGE_INFO         - SD card storage info\n");
+    SerialBT.print("\nMAINTENANCE:\n");
+    SerialBT.print("  SD_VERIFY            - Verify SD card integrity\n");
+    SerialBT.print("  SD_DELETE_FLIGHT:N   - Delete flight N\n");
+    SerialBT.print("  CLEAR_DATA           - Format SD card (WARNING!)\n");
+    SerialBT.print("\nLEGACY:\n");
+    SerialBT.print("  1 / 0                - Start/Stop (backward compatibility)\n");
+    SerialBT.print("  HELP / ?             - Show this message\n");
+    SerialBT.print("========================\n\n");
 }
 
-// Handles data download commands
-void handleDownloadCommands(String command)
+// Handles SD card commands via Bluetooth
+void handleSDCommands(String command)
 {
-    if (command == "DOWNLOAD_PREPARE")
+    if (command == "SD_STATUS")
     {
-        uint16_t total_records = prepareDownload();
-        SerialBT.printf("DOWNLOAD_READY: %d records\n", total_records);
+        sendSDStatus();
     }
-    else if (command.startsWith("DOWNLOAD_RECORD:"))
+    else if (command == "SD_START_FLIGHT")
     {
-        // Extract record index
+        uint16_t flight_num = startSDFlightSession();
+        if (flight_num > 0)
+        {
+            SerialBT.printf("SD_FLIGHT_STARTED: %d\n", flight_num);
+        }
+        else
+        {
+            SerialBT.print("SD_FLIGHT_START_FAILED\n");
+        }
+    }
+    else if (command == "SD_END_FLIGHT")
+    {
+        if (endSDFlightSession())
+        {
+            SerialBT.print("SD_FLIGHT_ENDED\n");
+        }
+        else
+        {
+            SerialBT.print("SD_FLIGHT_END_FAILED\n");
+        }
+    }
+    else if (command == "SD_LIST_FLIGHTS")
+    {
+        t_flightInfo flights[10]; // List up to 10 flights
+        uint16_t count = listSDFlights(flights, 10);
+        
+        SerialBT.printf("SD_FLIGHTS: %d total\n", count);
+        for (uint16_t i = 0; i < count; i++)
+        {
+            SerialBT.printf("FLIGHT:%d,%d,%d,%d,%s\n",
+                           flights[i].flight_number,
+                           flights[i].start_timestamp,
+                           flights[i].end_timestamp,
+                           flights[i].record_count,
+                           flights[i].filename);
+        }
+    }
+    else if (command.startsWith("SD_DOWNLOAD_FLIGHT:"))
+    {
+        // Extract flight number
         int colonIndex = command.indexOf(':');
         if (colonIndex != -1)
         {
-            uint16_t record_index = command.substring(colonIndex + 1).toInt();
-            
-            t_dataRecord record;
-            if (downloadRecord(record_index, &record))
+            uint16_t flight_number = command.substring(colonIndex + 1).toInt();
+            if (downloadFlightFromSD(flight_number))
             {
-                // Send record data in CSV format for easy parsing
-                SerialBT.printf("RECORD:%d,%d,%d,", record_index, record.timestamp, record.record_id);
-                
-                // BME680 data
-                SerialBT.printf("%d,%d,%d,%d,", record.bme680.temp, record.bme680.humidity, 
-                               record.bme680.pressure, record.bme680.vocIndex);
-                
-                // Gas sensor data
-                SerialBT.printf("%d,%d,%d,%d,%d,%d,%d,", record.mhz19b.CO2, record.mq4.methane,
-                               record.mq7.carbonMonoxyde, record.mq131.ozone, record.mq131.no2,
-                               record.mq137.nh3, record.mq137.co);
-                
-                // GPS data
-                if (record.pixhawk.data_valid)
-                {
-                    SerialBT.printf("%.6f,%.6f,%.2f,%d,%d\n", 
-                                   record.pixhawk.latitude, record.pixhawk.longitude,
-                                   record.pixhawk.altitude, record.pixhawk.satellites_visible,
-                                   record.pixhawk.fix_type);
-                }
-                else
-                {
-                    SerialBT.printf("0,0,0,0,0\n");
-                }
+                SerialBT.printf("SD_DOWNLOAD_COMPLETE: Flight %d\n", flight_number);
             }
             else
             {
-                SerialBT.printf("DOWNLOAD_ERROR: Record %d not found\n", record_index);
+                SerialBT.printf("SD_DOWNLOAD_FAILED: Flight %d\n", flight_number);
             }
         }
     }
-    else if (command == "DOWNLOAD_STATUS")
+    else if (command == "SD_INFO")
     {
-        t_downloadStatus status;
-        getDownloadStatus(&status);
-        SerialBT.printf("DOWNLOAD_STATUS: %d/%d downloaded\n", 
-                        status.downloaded, status.total_records);
+        uint64_t total, used, free;
+        if (getSDCardInfo(&total, &used, &free))
+        {
+            SerialBT.printf("SD_INFO: Total=%lluMB Used=%lluMB Free=%lluMB\n",
+                           total/(1024*1024), used/(1024*1024), free/(1024*1024));
+        }
+        else
+        {
+            SerialBT.print("SD_INFO: Card not available\n");
+        }
     }
+    else if (command == "SD_VERIFY")
+    {
+        if (verifySDCard())
+        {
+            SerialBT.print("SD_VERIFY_OK\n");
+        }
+        else
+        {
+            SerialBT.print("SD_VERIFY_FAILED\n");
+        }
+    }
+    else if (command.startsWith("SD_DELETE_FLIGHT:"))
+    {
+        // Extract flight number
+        int colonIndex = command.indexOf(':');
+        if (colonIndex != -1)
+        {
+            uint16_t flight_number = command.substring(colonIndex + 1).toInt();
+            if (deleteSDFlight(flight_number))
+            {
+                SerialBT.printf("SD_DELETE_OK: Flight %d\n", flight_number);
+            }
+            else
+            {
+                SerialBT.printf("SD_DELETE_FAILED: Flight %d\n", flight_number);
+            }
+        }
+    }
+}
+
+// Sends SD card status via Bluetooth
+void sendSDStatus()
+{
+    t_sdConfig config;
+    getSDStatus(&config);
+    
+    SerialBT.printf("SD_STATUS: State=%d Flights=%d Records=%d Size=%lluMB Used=%lluMB\n",
+                    config.sd_state, config.total_flights, config.total_records_sd,
+                    config.card_size_mb, config.used_space_mb);
 }
 
 
