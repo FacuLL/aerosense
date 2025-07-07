@@ -30,6 +30,12 @@
 // Includes the MQ-131 sensor functions
 #include "sensors/MQ-131.hpp"
 
+// Includes the MQ-137 sensor functions
+#include "sensors/MQ-137.hpp"
+
+// Includes the Pixhawk interface functions
+#include "sensors/Pixhawk.hpp"
+
 // Includes Bluetooth communication functions
 #include "protocols/Bluetooth.hpp"
 
@@ -49,6 +55,12 @@ t_dataMQ7 dataMQ7;
 
 // Stores data from MQ-131 sensor
 t_dataMQ131 dataMQ131;
+
+// Stores data from MQ-137 sensor
+t_dataMQ137 dataMQ137;
+
+// Stores data from Pixhawk
+t_dataPixhawk dataPixhawk;
 
 // Flag to enable or disable measurement
 uint8_t xEnableMeasuring = 0;
@@ -146,7 +158,27 @@ void readAllSensors()
     // Read and send data from MQ-131 sensor
     getDataMQ131(&dataMQ131);
     sendData("O3:", dataMQ131.ozone, "ppm", 0);
-    sendData("NO2:", dataMQ131.no2, "ppm", 1);
+    sendData("NO2:", dataMQ131.no2, "ppm", 0);
+
+    // Read and send data from MQ-137 sensor
+    getDataMQ137(&dataMQ137);
+    sendData("NH3:", dataMQ137.nh3, "ppm", 0);
+    sendData("CO_MQ137:", dataMQ137.co, "ppm", 0);
+
+    // Read and send data from Pixhawk
+    getDataPixhawk(&dataPixhawk);
+    if (dataPixhawk.data_valid)
+    {
+        sendData("LAT:", (int32_t)(dataPixhawk.latitude * 1000000), "µdeg", 0);
+        sendData("LON:", (int32_t)(dataPixhawk.longitude * 1000000), "µdeg", 0);
+        sendData("ALT:", (int32_t)(dataPixhawk.altitude * 100), "cm", 0);
+        sendData("SAT:", dataPixhawk.satellites_visible, "", 0);
+        sendData("FIX:", dataPixhawk.fix_type, "", 1);
+    }
+    else
+    {
+        sendData("GPS:", 0, "NO_FIX", 1);
+    }
 }
 
 
@@ -225,5 +257,33 @@ void initSensors()
     else
     {
         Serial.println("Init MQ-131 OK !");
+    }
+
+    /* ------------------ INITIALIZE MQ-137 ------------------ */
+
+    // Initialize MQ-137 sensor
+    Serial.println("Start Init MQ-137...");
+    if (!initMQ137())
+    {
+        Serial.println("Failed Init MQ-137");
+    }
+    
+    else
+    {
+        Serial.println("Init MQ-137 OK !");
+    }
+
+    /* ------------------ INITIALIZE PIXHAWK ------------------ */
+
+    // Initialize Pixhawk communication
+    Serial.println("Start Init Pixhawk...");
+    if (!initPixhawk())
+    {
+        Serial.println("Failed Init Pixhawk");
+    }
+    
+    else
+    {
+        Serial.println("Init Pixhawk OK !");
     }
 }
