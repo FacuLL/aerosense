@@ -25,6 +25,11 @@
 // Bluetooth serial object for communication
 BluetoothSerial SerialBT;
 
+/* ---------------------- FORWARD DECLARATIONS ---------------------- */
+
+// Process complete Bluetooth commands (internal function)
+void processBluetoothCommand(String command, uint8_t *xEnableMeasuring);
+
 
 /* *****************************************************************
     *                      INIT COMMUNICATION                     *
@@ -168,9 +173,6 @@ void processBluetoothCommand(String command, uint8_t *xEnableMeasuring)
 /* *****************************************************************
     *                   DATA LOGGING FUNCTIONS                    *
    ***************************************************************** */
-
-// Process complete Bluetooth commands (declaration for internal use)
-void processBluetoothCommand(String command, uint8_t *xEnableMeasuring);
 
 // Sends logging status via Bluetooth
 void sendLoggingStatus()
