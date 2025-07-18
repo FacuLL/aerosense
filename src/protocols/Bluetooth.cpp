@@ -25,6 +25,11 @@
 // Bluetooth serial object for communication
 BluetoothSerial SerialBT;
 
+/* ---------------------- FORWARD DECLARATIONS ---------------------- */
+
+// Process complete Bluetooth commands (internal function)
+void processBluetoothCommand(String command, uint8_t *xEnableMeasuring);
+
 
 /* *****************************************************************
     *                      INIT COMMUNICATION                     *
