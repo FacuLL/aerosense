@@ -21,7 +21,7 @@
 /* ---------------------- GLOBAL VARIABLES ---------------------- */
 
 // HardwareSerial object for UART communication with MH-Z19B
-HardwareSerial uartMHZ19B(2);
+HardwareSerial uartMHZ19B(1);
 
 // Buffer for sensor response
 uint8_t _response[9];

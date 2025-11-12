@@ -11,8 +11,8 @@
 // Standard integer types for portability
 #include <stdint.h>
 
-// GPIO functions for ESP32
-#include <esp32-hal-gpio.h>
+// Pull in Arduino core for pin helpers
+#include <Arduino.h>
 
 /* -------------------- MACROS AND CONSTANTS -------------------- */
 

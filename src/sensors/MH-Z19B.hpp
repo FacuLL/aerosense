@@ -20,8 +20,8 @@
 #define BAUD 9600
 
 // Pin definitions for RX and TX
-#define P_RX 15
-#define P_TX 18
+#define P_RX 3
+#define P_TX 1
 
 /* ---------------------- DATA STRUCTURES ------------------------ */
 

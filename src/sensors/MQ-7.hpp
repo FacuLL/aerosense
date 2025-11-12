@@ -10,7 +10,7 @@
 
 // Includes for standard integer types and ESP32 GPIO functions
 #include <stdint.h>
-#include <esp32-hal-gpio.h>
+#include <Arduino.h>
 
 /* -------------------- MACROS AND CONSTANTS -------------------- */
 

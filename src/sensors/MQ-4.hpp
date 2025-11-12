@@ -11,8 +11,8 @@
 // Standard library for integer types
 #include <stdint.h>
 
-// Library for GPIO functions on the ESP32
-#include <esp32-hal-gpio.h>
+// Arduino core definitions for pin constants live in Arduino.h
+#include <Arduino.h>
 
 /* -------------------- MACROS AND CONSTANTS -------------------- */
 

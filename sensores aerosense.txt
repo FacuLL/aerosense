@@ -25,6 +25,9 @@ MQ137:
 NH3 (en ppm) 5 a 500 ppm
 CO (en ppm)
 
+GY-UV1:
+Intensidad UV (en mW/cm^2)
+
 Pixhawk:
 Coordenadas
 Altura

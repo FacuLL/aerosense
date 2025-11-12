@@ -33,6 +33,12 @@
 // Includes the MQ-137 sensor functions
 #include "sensors/MQ-137.hpp"
 
+// Includes the GY-UV1 sensor functions
+#include "sensors/GY-UV1.hpp"
+
+// Includes the PMS5003 sensor functions
+#include "sensors/PMS5003.hpp"
+
 // Includes the Pixhawk interface functions
 #include "sensors/Pixhawk.hpp"
 
@@ -58,6 +64,12 @@ t_dataMQ131 dataMQ131;
 
 // Stores data from MQ-137 sensor
 t_dataMQ137 dataMQ137;
+
+// Stores data from GY-UV1 sensor
+t_dataGYUV1 dataGYUV1;
+
+// Stores data from PMS5003 sensor
+t_dataPMS5003 dataPMS5003;
 
 // Stores data from Pixhawk
 t_dataPixhawk dataPixhawk;
@@ -165,20 +177,30 @@ void readAllSensors()
     sendData("NH3:", dataMQ137.nh3, "ppm", 0);
     sendData("CO_MQ137:", dataMQ137.co, "ppm", 0);
 
+    // Read and send data from GY-UV1 sensor
+    getDataGYUV1(&dataGYUV1);
+    sendData("UV:", dataGYUV1.uvIntensity, "mW/cm2", 0);
+
+    // Read and send data from PMS5003 sensor
+    getDataPMS5003(&dataPMS5003);
+    sendData("PM1.0:", dataPMS5003.pm1_0, "ug/m3", 0);
+    sendData("PM2.5:", dataPMS5003.pm2_5, "ug/m3", 0);
+    sendData("PM10:", dataPMS5003.pm10, "ug/m3", 0);
+
     // Read and send data from Pixhawk
-    getDataPixhawk(&dataPixhawk);
-    if (dataPixhawk.data_valid)
-    {
-        sendData("LAT:", (int32_t)(dataPixhawk.latitude * 1000000), "µdeg", 0);
-        sendData("LON:", (int32_t)(dataPixhawk.longitude * 1000000), "µdeg", 0);
-        sendData("ALT:", (int32_t)(dataPixhawk.altitude * 100), "cm", 0);
-        sendData("SAT:", dataPixhawk.satellites_visible, "", 0);
-        sendData("FIX:", dataPixhawk.fix_type, "", 1);
-    }
-    else
-    {
+    // getDataPixhawk(&dataPixhawk);
+    // if (dataPixhawk.data_valid)
+    // {
+    //     sendData("LAT:", (int32_t)(dataPixhawk.latitude * 1000000), "µdeg", 0);
+    //     sendData("LON:", (int32_t)(dataPixhawk.longitude * 1000000), "µdeg", 0);
+    //     sendData("ALT:", (int32_t)(dataPixhawk.altitude * 100), "cm", 0);
+    //     sendData("SAT:", dataPixhawk.satellites_visible, "", 0);
+    //     sendData("FIX:", dataPixhawk.fix_type, "", 1);
+    // }
+    // else
+    // {
         sendData("GPS:", 0, "NO_FIX", 1);
-    }
+    // }
 }
 
 
@@ -273,17 +295,45 @@ void initSensors()
         Serial.println("Init MQ-137 OK !");
     }
 
+    /* ------------------ INITIALIZE PMS5003 ------------------ */
+
+    // Initialize PMS5003 sensor
+    Serial.println("Start Init PMS5003...");
+    if (!initPMS5003())
+    {
+        Serial.println("Failed Init PMS5003");
+    }
+
+    else
+    {
+        Serial.println("Init PMS5003 OK !");
+    }
+
+    /* ------------------ INITIALIZE GY-UV1 ------------------ */
+
+    // Initialize GY-UV1 sensor
+    Serial.println("Start Init GY-UV1...");
+    if (!initGYUV1())
+    {
+        Serial.println("Failed Init GY-UV1");
+    }
+
+    else
+    {
+        Serial.println("Init GY-UV1 OK !");
+    }
+
     /* ------------------ INITIALIZE PIXHAWK ------------------ */
 
     // Initialize Pixhawk communication
-    Serial.println("Start Init Pixhawk...");
-    if (!initPixhawk())
-    {
-        Serial.println("Failed Init Pixhawk");
-    }
+    // Serial.println("Start Init Pixhawk...");
+    // if (!initPixhawk())
+    // {
+    //     Serial.println("Failed Init Pixhawk");
+    // }
     
-    else
-    {
-        Serial.println("Init Pixhawk OK !");
-    }
+    // else
+    // {
+    //     Serial.println("Init Pixhawk OK !");
+    // }
 }
