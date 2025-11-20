@@ -25,5 +25,8 @@ void handleBT(uint8_t *xEnableMeasuring);
 // Sends data via Bluetooth
 void sendData(String nom, uint16_t data, String unidad, uint8_t CR);
 
+// Prints a section header to Serial and Bluetooth outputs
+void sendSectionHeader(const char *sectionName);
+
 #endif // COMMBLUETOOTH_hpp
 

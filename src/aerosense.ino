@@ -81,7 +81,7 @@ uint8_t xEnableMeasuring = 0;
 long preMillis;
 
 // Measurement interval in milliseconds
-#define PERIODE_MESURE 10000
+#define PERIODE_MESURE 2000
 
 
 /* *****************************************************************
@@ -92,7 +92,7 @@ long preMillis;
 void setup()
 {
     /* --------------------- INITIALIZATION --------------------- */
-
+    Serial.println("Initialization");
     // Start the serial communication at 115200 baud
     Serial.begin(115200);
 
@@ -133,6 +133,7 @@ void loop()
 
         if (xEnableMeasuring)
         {
+            Serial.println("Measuring...");
             readAllSensors();
         }
     }
@@ -146,48 +147,66 @@ void loop()
 // Reads data from all sensors and sends it via Bluetooth
 void readAllSensors()
 {
+    
     /* ------------------- SENSOR MEASUREMENTS ------------------- */
 
-    // Read and send data from BME680 sensor
-    getDataBME680(&dataBME680);
-    sendData("Temp:", dataBME680.temp, "°", 0);
-    sendData("Humidity:", dataBME680.humidity, "%", 0);
-    sendData("Pressure:", dataBME680.pressure, "hPa", 0);
-    sendData("VOC Index:", dataBME680.vocIndex, "", 0);
+    /* ====================== BME680 SENSOR ====================== */
+    // sendSectionHeader("BME680 SENSOR");
+    // // Acquire and forward BME680 environmental metrics
+    // getDataBME680(&dataBME680);
+    // sendData("Temp:", dataBME680.temp, "°", 0);
+    // sendData("Humidity:", dataBME680.humidity, "%", 0);
+    // sendData("Pressure:", dataBME680.pressure, "hPa", 0);
+    // sendData("VOC Index:", dataBME680.vocIndex, "", 1);
 
-    // Read and send data from MH-Z19B sensor
-    getDataMHZ19B(&dataMHZ19B);
-    sendData("CO2:", dataMHZ19B.CO2, "ppm", 0);
+    /* ====================== MH-Z19B SENSOR ===================== */
+    // Uncomment when MH-Z19B data is ready to be reported
+    // getDataMHZ19B(&dataMHZ19B);
+    // sendData("CO2:", dataMHZ19B.CO2, "ppm", 0);
 
-    // Read and send data from MQ-4 sensor
+    /* ======================= MQ-4 SENSOR ======================= */
+    sendSectionHeader("MQ-4 SENSOR");
+    // Capture methane concentration from MQ-4
     getDataMQ4(&dataMQ4);
-    sendData("CH4:", dataMQ4.methane, "ppm", 0);
+    sendData("CH4:", dataMQ4.methane, "ppm", 1);
 
-    // Read and send data from MQ-7 sensor
+    /* ======================= MQ-7 SENSOR ======================= */
+    sendSectionHeader("MQ-7 SENSOR");
+    // Capture carbon monoxide concentration from MQ-7
     getDataMQ7(&dataMQ7);
-    sendData("CO:", dataMQ7.carbonMonoxyde, "ppm", 0);
+    sendData("CO:", dataMQ7.carbonMonoxyde, "ppm", 1);
 
-    // Read and send data from MQ-131 sensor
+    /* ====================== MQ-131 SENSOR ====================== */
+    sendSectionHeader("MQ-131 SENSOR");
+    // Capture ozone and NO2 levels from MQ-131
     getDataMQ131(&dataMQ131);
     sendData("O3:", dataMQ131.ozone, "ppm", 0);
-    sendData("NO2:", dataMQ131.no2, "ppm", 0);
+    sendData("NO2:", dataMQ131.no2, "ppm", 1);
 
-    // Read and send data from MQ-137 sensor
+    /* ====================== MQ-137 SENSOR ====================== */
+    sendSectionHeader("MQ-137 SENSOR");
+    // Capture ammonia and CO readings from MQ-137
     getDataMQ137(&dataMQ137);
     sendData("NH3:", dataMQ137.nh3, "ppm", 0);
-    sendData("CO_MQ137:", dataMQ137.co, "ppm", 0);
+    sendData("CO_MQ137:", dataMQ137.co, "ppm", 1);
 
-    // Read and send data from GY-UV1 sensor
+    /* ======================= GY-UV1 SENSOR ===================== */
+    sendSectionHeader("GY-UV1 SENSOR");
+    // Capture UV intensity from GY-UV1
     getDataGYUV1(&dataGYUV1);
-    sendData("UV:", dataGYUV1.uvIntensity, "mW/cm2", 0);
+    sendData("UV:", dataGYUV1.uvIntensity, "mW/cm2", 1);
 
-    // Read and send data from PMS5003 sensor
+    /* ====================== PMS5003 SENSOR ===================== */
+    sendSectionHeader("PMS5003 SENSOR");
+    // Capture particulate matter concentrations from PMS5003
     getDataPMS5003(&dataPMS5003);
     sendData("PM1.0:", dataPMS5003.pm1_0, "ug/m3", 0);
     sendData("PM2.5:", dataPMS5003.pm2_5, "ug/m3", 0);
-    sendData("PM10:", dataPMS5003.pm10, "ug/m3", 0);
+    sendData("PM10:", dataPMS5003.pm10, "ug/m3", 1);
 
-    // Read and send data from Pixhawk
+    /* ====================== PIXHAWK STATUS ===================== */
+    // sendSectionHeader("PIXHAWK STATUS");
+    // Read and send data from Pixhawk autopilot
     // getDataPixhawk(&dataPixhawk);
     // if (dataPixhawk.data_valid)
     // {
@@ -199,8 +218,10 @@ void readAllSensors()
     // }
     // else
     // {
-        sendData("GPS:", 0, "NO_FIX", 1);
+        // sendData("GPS:", 0, "NO_FIX", 1);
     // }
+
+    sendSectionHeader("END OF MEASUREMENT");
 }
 
 
@@ -214,30 +235,30 @@ void initSensors()
     /* ------------------ INITIALIZE BME680 ------------------ */
 
     // Initialize BME680 sensor
-    Serial.println("Start Init BME680...");
-    if (!initBME680())
-    {
-        Serial.println("Failed Init BME680");
-    }
+    // Serial.println("Start Init BME680...");
+    // if (!initBME680())
+    // {
+    //     Serial.println("Failed Init BME680");
+    // }
     
-    else
-    {
-        Serial.println("Init BME680 OK !");
-    }
+    // else
+    // {
+    //     Serial.println("Init BME680 OK !");
+    // }
 
     /* ------------------ INITIALIZE MH-Z19B ------------------ */
 
     // Initialize MH-Z19B sensor
-    Serial.println("Start Init MHZ19B...");
-    if (!initMHZ19B())
-    {
-        Serial.println("Failed Init MHZ19B");
-    }
+    // Serial.println("Start Init MHZ19B...");
+    // if (!initMHZ19B())
+    // {
+    //     Serial.println("Failed Init MHZ19B");
+    // }
 
-    else
-    {
-        Serial.println("Init MHZ19B OK !");
-    }
+    // else
+    // {
+    //     Serial.println("Init MHZ19B OK !");
+    // }
 
     /* ------------------ INITIALIZE MQ-4 ------------------ */
 
