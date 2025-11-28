@@ -4,23 +4,12 @@
 
 #include <stdint.h>
 
-#ifndef P_GYUV1_UVOUT
-#define P_GYUV1_UVOUT 36
-#endif
-
-#ifndef P_GYUV1_REF
-#define P_GYUV1_REF 39
-#endif
-
-#ifndef P_GYUV1_ALS
-#define P_GYUV1_ALS 25
-#endif
+#define P_UV 39
 
 typedef struct
 {
+    int32_t uvIndex;
     int32_t uvRaw;
-    int32_t refRaw;
-    int32_t uvIntensity;
 
 } t_dataGYUV1;
 

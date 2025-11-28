@@ -188,7 +188,7 @@ void readAllSensors()
     sendSectionHeader("GY-UV1 SENSOR");
     // Capture UV intensity from GY-UV1
     getDataGYUV1(&dataGYUV1);
-    sendData("UV:", dataGYUV1.uvIntensity, "mW/cm2", 1);
+    sendData("UV:", dataGYUV1.uvRaw, "mW/cm2", 1);
 
     /* ====================== PMS5003 SENSOR ===================== */
     sendSectionHeader("PMS5003 SENSOR");

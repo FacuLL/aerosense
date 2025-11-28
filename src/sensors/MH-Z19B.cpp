@@ -42,6 +42,7 @@ int initMHZ19B()
     mhz19bSerial.begin(9600);
     delay(100);
     myMHZ19.begin(mhz19bSerial);                     // Set Range 2000
+    delay(100);
     myMHZ19.autoCalibration(false);
 
     if (myMHZ19.errorCode == RESULT_OK) {
@@ -49,6 +50,8 @@ int initMHZ19B()
         myMHZ19.calibrate();                                // Calibrate
         return 1;
     }
+
+    delay(100);
     return 0;
 }
 
