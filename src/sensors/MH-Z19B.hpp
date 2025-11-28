@@ -10,19 +10,12 @@
 
 // Standard integer types for fixed-width integer definitions
 #include <stdint.h>
-
-// Provides the HardwareSerial class for UART communication
-#include <SoftwareSerial.h>
-#include <MHZ19.h>
+#include <Arduino.h>
 
 /* -------------------- MACROS AND CONSTANTS ------------------------- */
 
-// UART baud rate for MH-Z19B communication
-#define BAUD 9600
-
 // Pin definitions for RX and TX
-#define P_RX 15
-#define P_TX 18
+#define P_MH 15
 
 /* ---------------------- DATA STRUCTURES ------------------------ */
 

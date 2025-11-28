@@ -6,7 +6,7 @@ static bool pinsConfigured = false;
 
 int initGYUV1()
 {
-
+    pinMode(P_UV, INPUT);
     pinsConfigured = true;
     return 1;
 }
