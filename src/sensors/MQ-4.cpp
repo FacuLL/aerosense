@@ -49,5 +49,5 @@ void getDataMQ4(t_dataMQ4 *newData)
     /* --------------------- PROCESS DATA --------------------- */
 
     // Scale raw data to obtain methane concentration
-    newData->methane = static_cast<uint16_t>(rawData / 10);
+    newData->methane = static_cast<uint16_t>(rawData);
 }

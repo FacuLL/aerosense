@@ -50,7 +50,7 @@ void getDataMQ137(t_dataMQ137 *newData)
     // Formula for Ammonia (NH3) calculation (in ppm)
     // MQ-137 range: 5-500 ppm for NH3
     // Placeholder linear mapping - should be calibrated with actual sensor
-    newData->nh3 = (int32_t)((rawData - 150) * 0.12); 
+    newData->nh3 = (int32_t)((rawData)); 
 
     // Ensure NH3 is within valid range
     if (newData->nh3 < 5) newData->nh3 = 5;       
@@ -58,7 +58,7 @@ void getDataMQ137(t_dataMQ137 *newData)
 
     // Formula for Carbon Monoxide (CO) calculation (in ppm)
     // Placeholder linear mapping - should be calibrated with actual sensor
-    newData->co = (int32_t)((rawData - 100) * 0.08);
+    newData->co = (int32_t)((rawData));
 
     // Ensure no negative CO values
     if (newData->co < 0) newData->co = 0;          

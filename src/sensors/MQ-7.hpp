@@ -15,7 +15,7 @@
 /* -------------------- MACROS AND CONSTANTS -------------------- */
 
 // Pin connected to the MQ-7 sensor
-#define P_MQ7 35
+#define P_MQ7 34
 
 /* ------------------- PUBLIC STRUCTURE TYPES ------------------- */
 

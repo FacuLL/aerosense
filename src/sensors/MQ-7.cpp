@@ -49,6 +49,6 @@ void getDataMQ7(t_dataMQ7 *newData)
     /* ------------------ SCALING AND STORAGE ------------------ */
 
     // Scale raw data and store in the structure
-    newData->carbonMonoxyde = (uint16_t)(rawData / 100);
+    newData->carbonMonoxyde = (uint16_t) rawData;
 }
 

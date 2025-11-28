@@ -17,7 +17,7 @@
 /* -------------------- MACROS AND CONSTANTS -------------------- */
 
 // Pin for O3 and NO2 measurement
-#define P_MQ131 34
+#define P_MQ131 35
 
 /* ----------------- PUBLIC FUNCTIONS PROTOTYPES ----------------- */
 

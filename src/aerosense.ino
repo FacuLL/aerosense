@@ -92,10 +92,10 @@ long preMillis;
 void setup()
 {
     /* --------------------- INITIALIZATION --------------------- */
-    Serial.println("Initialization");
     // Start the serial communication at 115200 baud
     Serial.begin(115200);
-
+    
+    Serial.println("Initialization");
     // Initialize all sensors
     initSensors();
 
@@ -151,18 +151,19 @@ void readAllSensors()
     /* ------------------- SENSOR MEASUREMENTS ------------------- */
 
     /* ====================== BME680 SENSOR ====================== */
-    // sendSectionHeader("BME680 SENSOR");
+    sendSectionHeader("BME680 SENSOR");
     // // Acquire and forward BME680 environmental metrics
-    // getDataBME680(&dataBME680);
-    // sendData("Temp:", dataBME680.temp, "°", 0);
-    // sendData("Humidity:", dataBME680.humidity, "%", 0);
-    // sendData("Pressure:", dataBME680.pressure, "hPa", 0);
-    // sendData("VOC Index:", dataBME680.vocIndex, "", 1);
+    getDataBME680(&dataBME680);
+    sendData("Temp:", dataBME680.temp, "°", 0);
+    sendData("Humidity:", dataBME680.humidity, "%", 0);
+    sendData("Pressure:", dataBME680.pressure, "hPa", 0);
+    sendData("VOC Index:", dataBME680.vocIndex, "", 1);
 
     /* ====================== MH-Z19B SENSOR ===================== */
     // Uncomment when MH-Z19B data is ready to be reported
-    // getDataMHZ19B(&dataMHZ19B);
-    // sendData("CO2:", dataMHZ19B.CO2, "ppm", 0);
+    sendSectionHeader("MH-Z19B SENSOR");
+    getDataMHZ19B(&dataMHZ19B);
+    sendData("CO2:", dataMHZ19B.CO2, "ppm", 0);
 
     /* ======================= MQ-4 SENSOR ======================= */
     sendSectionHeader("MQ-4 SENSOR");
@@ -182,13 +183,6 @@ void readAllSensors()
     getDataMQ131(&dataMQ131);
     sendData("O3:", dataMQ131.ozone, "ppm", 0);
     sendData("NO2:", dataMQ131.no2, "ppm", 1);
-
-    /* ====================== MQ-137 SENSOR ====================== */
-    sendSectionHeader("MQ-137 SENSOR");
-    // Capture ammonia and CO readings from MQ-137
-    getDataMQ137(&dataMQ137);
-    sendData("NH3:", dataMQ137.nh3, "ppm", 0);
-    sendData("CO_MQ137:", dataMQ137.co, "ppm", 1);
 
     /* ======================= GY-UV1 SENSOR ===================== */
     sendSectionHeader("GY-UV1 SENSOR");
@@ -235,30 +229,29 @@ void initSensors()
     /* ------------------ INITIALIZE BME680 ------------------ */
 
     // Initialize BME680 sensor
-    // Serial.println("Start Init BME680...");
-    // if (!initBME680())
-    // {
-    //     Serial.println("Failed Init BME680");
-    // }
-    
-    // else
-    // {
-    //     Serial.println("Init BME680 OK !");
-    // }
+    Serial.println("Start Init BME680...");
+    if (!initBME680())
+    {
+        Serial.println("Failed Init BME680");
+        Serial.flush();
+    }
+    else
+    {
+        Serial.println("Init BME680 OK !");
+    }
 
     /* ------------------ INITIALIZE MH-Z19B ------------------ */
 
     // Initialize MH-Z19B sensor
-    // Serial.println("Start Init MHZ19B...");
-    // if (!initMHZ19B())
-    // {
-    //     Serial.println("Failed Init MHZ19B");
-    // }
-
-    // else
-    // {
-    //     Serial.println("Init MHZ19B OK !");
-    // }
+    Serial.println("Start Init MHZ19B...");
+    if (!initMHZ19B())
+    {
+        Serial.println("Failed Init MHZ19B");
+    }
+    else
+    {
+        Serial.println("Init MHZ19B OK !");
+    }
 
     /* ------------------ INITIALIZE MQ-4 ------------------ */
 
@@ -302,20 +295,6 @@ void initSensors()
         Serial.println("Init MQ-131 OK !");
     }
 
-    /* ------------------ INITIALIZE MQ-137 ------------------ */
-
-    // Initialize MQ-137 sensor
-    Serial.println("Start Init MQ-137...");
-    if (!initMQ137())
-    {
-        Serial.println("Failed Init MQ-137");
-    }
-    
-    else
-    {
-        Serial.println("Init MQ-137 OK !");
-    }
-
     /* ------------------ INITIALIZE PMS5003 ------------------ */
 
     // Initialize PMS5003 sensor
@@ -333,16 +312,16 @@ void initSensors()
     /* ------------------ INITIALIZE GY-UV1 ------------------ */
 
     // Initialize GY-UV1 sensor
-    Serial.println("Start Init GY-UV1...");
-    if (!initGYUV1())
-    {
-        Serial.println("Failed Init GY-UV1");
-    }
+    // Serial.println("Start Init GY-UV1...");
+    // if (!initGYUV1())
+    // {
+    //     Serial.println("Failed Init GY-UV1");
+    // }
 
-    else
-    {
-        Serial.println("Init GY-UV1 OK !");
-    }
+    // else
+    // {
+    //     Serial.println("Init GY-UV1 OK !");
+    // }
 
     /* ------------------ INITIALIZE PIXHAWK ------------------ */
 

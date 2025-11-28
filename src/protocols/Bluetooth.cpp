@@ -17,6 +17,10 @@
 // Required for Bluetooth communication
 #include "Bluetooth.hpp"
 
+#ifdef ESP32
+#include "esp_bt.h"
+#endif
+
 /* ---------------------- GLOBAL VARIABLES ---------------------- */
 
 // Bluetooth serial object for communication
@@ -32,6 +36,23 @@ BluetoothSerial SerialBT;
 int initCommBT()
 {
     /* -------------------- INITIALIZATION -------------------- */
+
+#ifdef ESP32
+    static bool bleMemoryReleased = false;
+
+    if (!bleMemoryReleased)
+    {
+        const esp_err_t releaseResult = esp_bt_controller_mem_release(ESP_BT_MODE_BLE);
+
+        if (releaseResult != ESP_OK && releaseResult != ESP_ERR_INVALID_STATE)
+        {
+            Serial.printf("BLE mem release failed: %d\n", releaseResult);
+            return 0;
+        }
+
+        bleMemoryReleased = true;
+    }
+#endif
 
     // Start Bluetooth communication with the name "AeroSense"
     if (!SerialBT.begin("AeroSense"))

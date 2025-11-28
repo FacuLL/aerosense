@@ -12,7 +12,8 @@
 #include <stdint.h>
 
 // Provides the HardwareSerial class for UART communication
-#include <HardwareSerial.h>
+#include <SoftwareSerial.h>
+#include <MHZ19.h>
 
 /* -------------------- MACROS AND CONSTANTS ------------------------- */
 
@@ -20,8 +21,8 @@
 #define BAUD 9600
 
 // Pin definitions for RX and TX
-#define P_RX 3
-#define P_TX 1
+#define P_RX 15
+#define P_TX 18
 
 /* ---------------------- DATA STRUCTURES ------------------------ */
 

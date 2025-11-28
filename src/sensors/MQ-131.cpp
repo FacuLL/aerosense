@@ -48,13 +48,13 @@ void getDataMQ131(t_dataMQ131 *newData)
     /* ------------------ PROCESS SENSOR DATA ------------------ */
 
     // Placeholder formula for Ozone (O3) calculation (in ppb)
-    newData->ozone = (int32_t)((rawData - 100) * 0.5); 
+    newData->ozone = (int32_t)(rawData); 
 
     // Ensure no negative values
     if (newData->ozone < 0) newData->ozone = 0;       
 
     // Placeholder formula for Nitrogen Dioxide (NO2) calculation (in ppb)
-    newData->no2 = (int32_t)((rawData - 50) * 0.3);
+    newData->no2 = (int32_t)(rawData);
 
     // Ensure no negative values
     if (newData->no2 < 0) newData->no2 = 0;          
