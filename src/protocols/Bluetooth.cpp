@@ -23,6 +23,7 @@
 
 /* ---------------------- GLOBAL VARIABLES ---------------------- */
 
+
 // Bluetooth serial object for communication
 BluetoothSerial SerialBT;
 
@@ -116,6 +117,12 @@ void handleBT(uint8_t *xEnableMeasuring)
 /* *****************************************************************
     *                      SEND DATA FUNCTION                     *
    ***************************************************************** */
+
+void printBT(const char* message)
+{
+    SerialBT.println(message);
+    Serial.println(message);
+}
 
 // Sends data via Bluetooth
 // Parameters:

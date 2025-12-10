@@ -22,6 +22,8 @@ int initCommBT();
 // Handles incoming Bluetooth commands to enable or disable measurements
 void handleBT(uint8_t *xEnableMeasuring);
 
+void printBT(const char* message);
+
 // Sends data via Bluetooth
 void sendData(String nom, uint16_t data, String unidad, uint8_t CR);
 
