@@ -8,7 +8,7 @@
 
 // ====================== Parámetros hardware ======================
 static float MQ4_R0        = 10000.0f;
-static const float MQ4_RL  = 20.0f;
+static const float MQ4_RL  = 10.0f;
 static const float MQ4_VREF = 5.0f;
 
 // ====================== Calibración base ======================
