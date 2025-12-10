@@ -178,7 +178,7 @@ void checkAndCalibrateR0() {
 void sendCSVData() {
     char buffer[200];
     snprintf(buffer, sizeof(buffer),
-        "%lu,%.2f,%.2f,%.2f,%u,%u,%u,%u,%.2f,%u,%u,%u",
+        "%lu,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
         millis(),
         dataBME680.temp,
         dataBME680.humidity,
